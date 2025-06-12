@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block title %}Подтверждение удаления{% endblock %}
+
+{% block content %}
+<h1>Подтверждение удаления</h1>
+<p>Введите код для удаления страны:</p>
+<form method="POST">
+    <label for="code">Код удаления</label>
+    <input type="text" id="code" name="code" required>
+    <button type="submit">Удалить</button>
+</form>
+<a href="{{ url_for('countries_index') }}" class="button-link">Отмена</a>
+{% endblock %}

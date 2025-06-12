@@ -6,6 +6,7 @@ A small Flask web application for tracking equipment purchases, sales, and stock
 
 - Record equipment purchases and sales
 - Organize products by category
+- Browse and manage countries of origin
 - View current warehouse stock
 - Generate revision reports over date ranges
 
