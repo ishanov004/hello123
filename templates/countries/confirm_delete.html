@@ -3,12 +3,19 @@
 {% block title %}Подтверждение удаления{% endblock %}
 
 {% block content %}
-<h1>Подтверждение удаления</h1>
-<p>Введите код для удаления страны:</p>
-<form method="POST">
-    <label for="code">Код удаления</label>
-    <input type="text" id="code" name="code" required>
-    <button type="submit">Удалить</button>
-</form>
-<a href="{{ url_for('countries_index') }}" class="button-link">Отмена</a>
+<div class="content-card">
+    <h1 class="welcome-title">Подтвердите удаление</h1>
+    <p>Введите код для удаления страны:</p>
+    <form method="POST" class="form-grid">
+        <div class="form-group">
+            <label for="code">Код удаления</label>
+            <input type="text" id="code" name="code" required>
+        </div>
+        <div class="form-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="nav-button">Удалить</button>
+        </div>
+    </form>
+    <a href="{{ url_for('countries_index') }}" class="button-link">Отмена</a>
+</div>
 {% endblock %}

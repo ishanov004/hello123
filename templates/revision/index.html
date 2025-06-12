@@ -24,7 +24,7 @@
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Общая стоимость закупок</h3>
-            <p class="stat-value">{{ '{:,.2f}'.format(total_buy) if total_buy is not none else '0.00' }} руб.</p>
+            <p class="stat-value">{{ '{:,.2f}'.format(total_buy) if total_buy is not none else '0.00' }} ₽</p>
         </div>
         <div class="stat-card">
             <h3>Количество продаж</h3>
@@ -36,7 +36,7 @@
         </div>
         <div class="stat-card">
             <h3>Общая выручка от продаж</h3>
-            <p class="stat-value">{{ '{:,.2f}'.format(total_sales_revenue) if total_sales_revenue is not none else '0.00' }} руб.</p>
+            <p class="stat-value">{{ '{:,.2f}'.format(total_sales_revenue) if total_sales_revenue is not none else '0.00' }} ₽</p>
         </div>
     </div>
 </div>
