@@ -285,6 +285,7 @@ def countries_index():
         FROM countries c
         LEFT JOIN equipment e ON e.country = c.name
         GROUP BY c.id, c.name
+        """
         """)
     conn = get_db_connection()
     countries = conn.execute(
@@ -332,7 +333,6 @@ def countries_delete(country_id):
             return redirect(url_for('countries_delete', country_id=country_id))
     return render_template('countries/confirm_delete.html', country_id=country_id)
 
-
 @app.route('/warehouse')
 def warehouse_index():
     conn = get_db_connection()
@@ -379,13 +379,15 @@ def revision_index():
     total_sales_revenue = conn.execute(sales_revenue_query, params).fetchone()[0] or 0
 
     conn.close()
-    return render_template('revision/index.html',
-                           total_buy=round(total_buy, 2),
-                           total_sales=total_sales,
-                           total_quantity_sold=total_quantity_sold,
-                           total_sales_revenue=round(total_sales_revenue, 2),
-                           from_date=from_date,
-                           to_date=to_date)
+    return render_template(
+        'revision/index.html',
+        total_buy=round(total_buy),
+        total_sales=total_sales,
+        total_quantity_sold=total_quantity_sold,
+        total_sales_revenue=round(total_sales_revenue),
+        from_date=from_date,
+        to_date=to_date,
+    )
 
 if __name__ == '__main__':
     init_db()

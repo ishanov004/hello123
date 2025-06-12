@@ -5,7 +5,7 @@
 {% block content %}
 <div class="content-card">
     <h1 class="welcome-title">Подтвердите удаление</h1>
-    <p>Введите код для удаления страны:</p>
+    <p>Введите код для удаления продажи:</p>
     <form method="POST" class="form-grid">
         <div class="form-group">
             <label for="code">Код удаления</label>
@@ -16,14 +16,6 @@
             <button type="submit" class="nav-button">Удалить</button>
         </div>
     </form>
-    <a href="{{ url_for('countries_index') }}" class="button-link">Отмена</a>
+    <a href="{{ url_for('sales_index') }}" class="button-link">Отмена</a>
 </div>
-<h1>Подтверждение удаления</h1>
-<p>Введите код для удаления страны:</p>
-<form method="POST">
-    <label for="code">Код удаления</label>
-    <input type="text" id="code" name="code" required>
-    <button type="submit">Удалить</button>
-</form>
-<a href="{{ url_for('countries_index') }}" class="button-link">Отмена</a>
 {% endblock %}
