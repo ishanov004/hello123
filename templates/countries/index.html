@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block title %}Страны{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <h1 class="welcome-title">🌍 Страны происхождения</h1>
+    <a href="{{ url_for('countries_add') }}" class="button-link">Добавить страну</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Страна</th>
+                <th>Количество товаров</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in countries %}
+            <tr>
+                <td>{{ c.name }}</td>
+                <td>{{ c.count }}</td>
+                <td>
+                    <a href="{{ url_for('countries_delete', country_id=c.id) }}" class="button-link">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
 .env
 push_to_github.py
 __pycache__/
+equipment.db
