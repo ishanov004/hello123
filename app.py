@@ -148,7 +148,7 @@ def buy_edit(item_id):
     countries = conn.execute('SELECT * FROM countries').fetchall()
     if request.method == 'POST':
         conn.execute('''
-            UPDATE equipment SET name=?, category_id=?, country=?, price=?, delivery=?, date=?, quantity=?
+            UPDATE equipment SET name=?, category_id=?, country=?, price=?, delivery=?, date=?
             WHERE id=?
         ''', (
             request.form['name'],
@@ -157,7 +157,6 @@ def buy_edit(item_id):
             float(request.form['price']),
             float(request.form['delivery']),
             request.form['date'],
-            int(request.form['quantity']),
             item_id
         ))
         conn.commit()
@@ -378,13 +377,26 @@ def countries_delete(country_id):
 def warehouse_index():
     conn = get_db_connection()
     items = conn.execute('''
-        SELECT e.name AS name, e.quantity, c.name AS category_name 
-        FROM equipment e 
+        SELECT e.id, e.name AS name, e.quantity, c.name AS category_name
+        FROM equipment e
         LEFT JOIN categories c ON e.category_id = c.id
         WHERE e.quantity > 0
     ''').fetchall()
     conn.close()
     return render_template('warehouse/index.html', items=items)
+
+@app.route('/warehouse/edit/<int:item_id>', methods=['GET', 'POST'])
+def warehouse_edit(item_id):
+    conn = get_db_connection()
+    item = conn.execute('SELECT * FROM equipment WHERE id=?', (item_id,)).fetchone()
+    if request.method == 'POST':
+        quantity = int(request.form['quantity'])
+        conn.execute('UPDATE equipment SET quantity=? WHERE id=?', (quantity, item_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('warehouse_index'))
+    conn.close()
+    return render_template('warehouse/edit.html', item=item)
 
 @app.route('/revision')
 def revision_index():
@@ -429,6 +441,37 @@ def revision_index():
         stats=stats if show_stats else None,
         snapshot_date=snapshot_date
     )
+
+
+@app.route('/history')
+def history_index():
+    conn = get_db_connection()
+    from_date = request.args.get('from')
+    to_date = request.args.get('to')
+
+    query = '''
+        SELECT h.id, e.name, h.quantity, h.price, h.date
+        FROM history h
+        LEFT JOIN equipment e ON h.item_id = e.id
+        WHERE h.action = "sell"
+    '''
+
+    conditions = []
+    params = []
+    if from_date:
+        conditions.append("h.date >= ?")
+        params.append(from_date)
+    if to_date:
+        conditions.append("h.date <= ?")
+        params.append(to_date)
+
+    if conditions:
+        query += " AND " + " AND ".join(conditions)
+    query += " ORDER BY h.date DESC"
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+    return render_template('history/index.html', rows=rows, from_date=from_date, to_date=to_date)
 
 
 

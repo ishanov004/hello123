@@ -7,12 +7,11 @@
     <h1 class="welcome-title">📦 Остатки на складе</h1>
     <table>
         <thead>
-
-
             <tr>
                 <th>Товар</th>
                 <th>Категория</th>
                 <th>Количество</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -22,7 +21,7 @@
                 <td>{{ item.category_name }}</td>
                 <td>{{ item.quantity }}</td>
                 <td>
-                    <a href="{{ url_for('sales_history', equipment_id=row['id']) }}" class="btn">📖 История</a>
+                    <a href="{{ url_for('warehouse_edit', item_id=item['id']) }}" class="button-link">Изменить</a>
                 </td>
             </tr>
             {% endfor %}
