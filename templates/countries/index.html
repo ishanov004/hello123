@@ -27,4 +27,22 @@
         </tbody>
     </table>
 </div>
+<h1>Страны происхождения</h1>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Страна</th>
+            <th>Количество товаров</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in countries %}
+        <tr>
+            <td>{{ c.country }}</td>
+            <td>{{ c.count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

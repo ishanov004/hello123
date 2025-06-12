@@ -271,6 +271,12 @@ def countries_index():
         LEFT JOIN equipment e ON e.country = c.name
         GROUP BY c.id, c.name
         """
+    """Display list of distinct countries from equipment."""
+    conn = get_db_connection()
+    countries = conn.execute(
+        "SELECT country, COUNT(*) AS count FROM equipment "
+        "WHERE country IS NOT NULL AND TRIM(country) <> '' "
+        "GROUP BY country"
     ).fetchall()
     conn.close()
     return render_template('countries/index.html', countries=countries)
@@ -311,6 +317,7 @@ def countries_delete(country_id):
             flash('Неверный код удаления')
             return redirect(url_for('countries_delete', country_id=country_id))
     return render_template('countries/confirm_delete.html', country_id=country_id)
+
 
 @app.route('/warehouse')
 def warehouse_index():
