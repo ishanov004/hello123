@@ -1,6 +1,7 @@
 # Warehouse Inventory Manager
 
 A small Flask web application for tracking equipment purchases, sales, and stock levels. The interface is in Russian and uses a simple SQLite database. All prices are shown in US dollars.
+A small Flask web application for tracking equipment purchases, sales, and stock levels. The interface is in Russian and uses a simple SQLite database.
 
 ## Features
 
