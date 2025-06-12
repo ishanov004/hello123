@@ -385,12 +385,13 @@ def warehouse_index():
         SELECT s.id, e.name AS name, s.quantity, c.name AS category_name
         FROM stock s
         JOIN equipment e ON s.equipment_id = e.id
+        SELECT e.id, e.name AS name, e.quantity, c.name AS category_name
+        FROM equipment e
         LEFT JOIN categories c ON e.category_id = c.id
         WHERE s.quantity > 0
     ''').fetchall()
     conn.close()
     return render_template('warehouse/index.html', items=items)
-
 @app.route('/warehouse/edit/<int:stock_id>', methods=['GET', 'POST'])
 def warehouse_edit(stock_id):
     conn = get_db_connection()
@@ -402,6 +403,13 @@ def warehouse_edit(stock_id):
     if request.method == 'POST':
         quantity = int(request.form['quantity'])
         conn.execute('UPDATE stock SET quantity=? WHERE id=?', (quantity, stock_id))
+@app.route('/warehouse/edit/<int:item_id>', methods=['GET', 'POST'])
+def warehouse_edit(item_id):
+    conn = get_db_connection()
+    item = conn.execute('SELECT * FROM equipment WHERE id=?', (item_id,)).fetchone()
+    if request.method == 'POST':
+        quantity = int(request.form['quantity'])
+        conn.execute('UPDATE equipment SET quantity=? WHERE id=?', (quantity, item_id))
         conn.commit()
         conn.close()
         return redirect(url_for('warehouse_index'))
