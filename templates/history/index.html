@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block title %}История продаж{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <h1 class="welcome-title">📖 История продаж</h1>
+    <form method="get" class="form-grid filter-section">
+        <div class="form-group">
+            <label for="from">От:</label>
+            <input type="date" id="from" name="from" value="{{ from_date }}">
+        </div>
+        <div class="form-group">
+            <label for="to">До:</label>
+            <input type="date" id="to" name="to" value="{{ to_date }}">
+        </div>
+        <div class="form-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn small-btn">🔍</button>
+        </div>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.name }}</td>
+                <td>{{ row.quantity }}</td>
+                <td>{{ '{:,.0f}'.format(row.price) }} $</td>
+                <td>{{ row.date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
