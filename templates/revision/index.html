@@ -1,43 +1,48 @@
+
 {% extends 'layout.html' %}
 
-{% block title %}Финансовый отчёт{% endblock %}
+{% block title %}📊 Финансовый отчёт{% endblock %}
 
 {% block content %}
 <div class="content-card">
     <h1 class="welcome-title">📊 Финансовый отчёт</h1>
 
-    <!-- Filter Section -->
-    <div class="form-grid filter-section">
-        <div class="form-group">
-            <label for="from_date">От даты:</label>
-            <input type="date" id="from_date" name="from_date" value="{{ from_date }}" onchange="this.form.submit()">
-        </div>
-        <div class="form-group">
-            <label for="to_date">До даты:</label>
-            <input type="date" id="to_date" name="to_date" value="{{ to_date }}" onchange="this.form.submit()">
-        </div>
-        <button type="submit" class="nav-button" formaction="{{ url_for('revision_index') }}">🔍 Фильтровать</button>
-        <a href="{{ url_for('revision_index') }}" class="nav-button reset-button">↻ Сбросить</a>
+<!-- 🔍 Поиск по дате -->
+<form method="get" action="{{ url_for('revision_index') }}" class="form-grid filter-section">
+    <div class="form-group">
+        <label for="snapshot_date">Дата:</label>
+        <input type="date" id="snapshot_date" name="snapshot_date" value="{{ snapshot_date }}">
     </div>
+    <div class="form-group">
+        <label>&nbsp;</label>
+        <button type="submit" class="button">🔍</button>
+    </div>
+    <div class="form-group ">
+        <label>&nbsp;</label>
+        <a href="{{ url_for('revision_index') }}" class="btn">↻</a>
+    </div>
+</form>
 
-    <!-- Statistics Section -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Общая стоимость закупок</h3>
-            <p class="stat-value">{{ '{:,.0f}'.format(total_buy) if total_buy is not none else '0' }} $</p>
-        </div>
-        <div class="stat-card">
-            <h3>Количество продаж</h3>
-            <p class="stat-value">{{ total_sales if total_sales is not none else 0 }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Общее количество проданных товаров</h3>
-            <p class="stat-value">{{ total_quantity_sold if total_quantity_sold is not none else 0 }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Общая выручка от продаж</h3>
-            <p class="stat-value">{{ '{:,.0f}'.format(total_sales_revenue) if total_sales_revenue is not none else '0' }} $</p>
-        </div>
+{% if stats %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Всего закупок:</h3>
+        <p>{{ stats.total_purchases }} $</p>
     </div>
+    <div class="stat-card">
+        <h3>Всего продаж:</h3>
+        <p>{{ stats.total_sales }} $</p>
+    </div>
+    <div class="stat-card">
+        <h3>Прибыль:</h3>
+        <p>{{ stats.total_profit }} $</p>
+    </div>
+</div>
+{% elif from_date or to_date %}
+    <p style="padding-top: 20px;">📭 Нет данных за выбранный период.</p>
+{% endif %}
+
+
+
 </div>
 {% endblock %}

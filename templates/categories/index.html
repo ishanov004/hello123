@@ -5,7 +5,7 @@
 {% block content %}
 <div class="content-card">
     <h1 class="welcome-title">📂 Категории</h1>
-    <a href="{{ url_for('categories_add') }}" class="button-link">Добавить категорию</a>
+   <a href="{{ url_for('sales_add') }}" class="btn">➕ Добавить категорию</a>
     <input type="text" id="searchInput" onkeyup="searchTable('searchInput', 'categoriesTable')" placeholder="Поиск по названию...">
     <table id="categoriesTable">
         <thead>

@@ -5,7 +5,7 @@
 {% block content %}
 <div class="content-card">
     <h1 class="welcome-title">💰 Продажи</h1>
-    <a href="{{ url_for('sales_add') }}" class="button-link">Добавить продажу</a>
+    <a href="{{ url_for('sales_add') }}" class="btn">➕ Добавить продажу</a>
     <input type="text" id="searchInput" onkeyup="searchTable('searchInput', 'salesTable')" placeholder="Поиск по товару...">
     <input type="date" id="fromDate" onchange="filterByDate()" placeholder="От даты">
     <input type="date" id="toDate" onchange="filterByDate()" placeholder="До даты">

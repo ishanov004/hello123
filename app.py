@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
 import os
 from dotenv import load_dotenv
-
+from datetime import datetime
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('DELETE_SECRET', os.urandom(24).hex())
@@ -28,6 +28,31 @@ def init_db():
             name TEXT NOT NULL UNIQUE
         )
     ''')
+    
+    # === New: Product history table ===
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id INTEGER,
+            action TEXT,
+            quantity INTEGER,
+            price REAL,
+            date TEXT,
+            FOREIGN KEY (item_id) REFERENCES equipment(id)
+        )
+    ''')
+
+    # === New: Stock snapshots table ===
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS stock_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id INTEGER,
+            quantity INTEGER,
+            snapshot_date TEXT,
+            FOREIGN KEY (item_id) REFERENCES equipment(id)
+        )
+    ''')
+
     cur.execute('''
         CREATE TABLE IF NOT EXISTS equipment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,7 +96,29 @@ def buy_index():
     return render_template('buy/index.html', items=items)
 
 @app.route('/buy/add', methods=['GET', 'POST'])
+@app.route('/buy/add', methods=['GET', 'POST'])
 def buy_add():
+    conn = get_db_connection()
+    categories = conn.execute('SELECT * FROM categories').fetchall()
+    countries = conn.execute('SELECT * FROM countries').fetchall()
+    if request.method == 'POST':
+        name = request.form['name']
+        category_id = request.form['category']
+        country = request.form['country']
+        price = request.form['price']
+        delivery = request.form['delivery']
+        date = request.form['date']
+        quantity = request.form['quantity']
+        conn.execute(
+            'INSERT INTO equipment (name, category_id, country, price, delivery, date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            (name, category_id, country, price, delivery, date, quantity)
+        )
+        conn.commit()
+        conn.close()
+        flash('Закупка добавлена!')
+        return redirect(url_for('buy_index'))
+    conn.close()
+    return render_template('buy/add.html', categories=categories, countries=countries)
     conn = get_db_connection()
     categories = conn.execute('SELECT * FROM categories').fetchall()
     countries = conn.execute('SELECT * FROM countries').fetchall()
@@ -83,11 +130,14 @@ def buy_add():
         delivery = float(request.form['delivery'])
         date = request.form['date']
         quantity = int(request.form['quantity'])
-        conn.execute('INSERT INTO equipment (name, category_id, country, price, delivery, date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                     (name, category_id, country, price, delivery, date, quantity))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('buy_index'))
+    conn.execute('INSERT INTO equipment (name, category_id, country, price, delivery, date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                 (name, category_id, country, price, delivery, date, quantity))  # <- end of INSERT
+    equipment_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+    conn.execute('INSERT INTO history (item_id, action, quantity, price, date) VALUES (?, ?, ?, ?, ?)',
+                 (equipment_id, 'buy', quantity, price, date))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('buy_index'))
     return render_template('buy/add.html', categories=categories, countries=countries)
 
 @app.route('/buy/edit/<int:item_id>', methods=['GET', 'POST'])
@@ -155,15 +205,26 @@ def sales_add():
         price = float(request.form['price'])
         item = conn.execute('SELECT quantity FROM equipment WHERE id = ?', (equipment_id,)).fetchone()
         if item and item['quantity'] >= quantity:
-            conn.execute('INSERT INTO sales (equipment_id, category_id, date, quantity, price) VALUES (?, ?, ?, ?, ?)',
-                         (equipment_id, category_id, date, quantity, price))
-            conn.execute('UPDATE equipment SET quantity = quantity - ? WHERE id = ?', (quantity, equipment_id))
+            conn.execute(
+                'INSERT INTO sales (equipment_id, category_id, date, quantity, price) VALUES (?, ?, ?, ?, ?)',
+                (equipment_id, category_id, date, quantity, price)
+            )
+            conn.execute(
+                'INSERT INTO history (item_id, action, quantity, price, date) VALUES (?, ?, ?, ?, ?)',
+                (equipment_id, 'sell', quantity, price, date)
+            )
+            conn.execute(
+                'UPDATE equipment SET quantity = quantity - ? WHERE id = ?',
+                (quantity, equipment_id)
+            )
             conn.commit()
             conn.close()
             return redirect(url_for('sales_index'))
         else:
-            flash(f'Ошибка: на складе только {item["quantity"]} шт.')
+            flash(f'Ошибка: на складе только {item["quantity"] if item else 0} шт.')
+            conn.close()
             return redirect(url_for('sales_add'))
+    conn.close()
     return render_template('sales/add.html', equipment=equipment, categories=categories)
 
 @app.route('/sales/edit/<int:sale_id>', methods=['GET', 'POST'])
@@ -277,26 +338,6 @@ def countries_index():
     conn.close()
     return render_template('countries/index.html', countries=countries)
 
-    """Display list of countries and counts of equipment."""
-    conn = get_db_connection()
-    countries = conn.execute(
-        """
-        SELECT c.id, c.name, COUNT(e.id) AS count
-        FROM countries c
-        LEFT JOIN equipment e ON e.country = c.name
-        GROUP BY c.id, c.name
-        """
-        """)
-    conn = get_db_connection()
-    countries = conn.execute(
-        "SELECT country, COUNT(*) AS count FROM equipment "
-        "WHERE country IS NOT NULL AND TRIM(country) <> '' "
-        "GROUP BY country"
-    ).fetchall()
-    conn.close()
-    return render_template('countries/index.html', countries=countries)
-
-
 @app.route('/countries/add', methods=['GET', 'POST'])
 def countries_add():
     conn = get_db_connection()
@@ -340,6 +381,7 @@ def warehouse_index():
         SELECT e.name AS name, e.quantity, c.name AS category_name 
         FROM equipment e 
         LEFT JOIN categories c ON e.category_id = c.id
+        WHERE e.quantity > 0
     ''').fetchall()
     conn.close()
     return render_template('warehouse/index.html', items=items)
@@ -348,46 +390,47 @@ def warehouse_index():
 def revision_index():
     conn = get_db_connection()
     from_date = request.args.get('from_date')
-    to_date = request.args.get('to_date')
+    snapshot_date = request.args.get('snapshot_date')
 
-    buy_query = 'SELECT SUM(price * quantity + delivery) FROM equipment'
-    sales_count_query = 'SELECT COUNT(*) FROM sales'
-    sales_quantity_query = 'SELECT SUM(quantity) FROM sales'
-    sales_revenue_query = 'SELECT SUM(price * quantity) FROM sales'
-
+    filters = []
     params = []
-    if from_date:
-        buy_query += ' WHERE date >= ?'
-        sales_count_query += ' WHERE date >= ?'
-        sales_quantity_query += ' WHERE date >= ?'
-        sales_revenue_query += ' WHERE date >= ?'
-        params.append(from_date)
-    if to_date:
-        buy_query += ' AND' if from_date else ' WHERE'
-        sales_count_query += ' AND' if from_date else ' WHERE'
-        sales_quantity_query += ' AND' if from_date else ' WHERE'
-        sales_revenue_query += ' AND' if from_date else ' WHERE'
-        buy_query += ' date <= ?'
-        sales_count_query += ' date <= ?'
-        sales_quantity_query += ' date <= ?'
-        sales_revenue_query += ' date <= ?'
-        params.append(to_date)
 
-    total_buy = conn.execute(buy_query, params).fetchone()[0] or 0
-    total_sales = conn.execute(sales_count_query, params).fetchone()[0] or 0
-    total_quantity_sold = conn.execute(sales_quantity_query, params).fetchone()[0] or 0
-    total_sales_revenue = conn.execute(sales_revenue_query, params).fetchone()[0] or 0
+    if from_date:
+        filters.append("date >= ?")
+        params.append(from_date)
+    if snapshot_date:
+        filters.append("date = ?")
+        params.append(snapshot_date)
+
+
+    where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
+
+    total_buy = conn.execute(
+        f'SELECT SUM(price * quantity + delivery) FROM equipment {where_clause}', params
+    ).fetchone()[0] or 0
+
+    total_sales = conn.execute(
+        f'SELECT SUM(price * quantity) FROM sales {where_clause}', params
+    ).fetchone()[0] or 0
 
     conn.close()
+
+    stats = {
+        "total_purchases": round(total_buy),
+        "total_sales": round(total_sales),
+        "total_profit": round(total_sales - total_buy)
+    }
+
+    # 👇 Новый флаг — просто проверяем, есть ли хоть какие-то данные
+    show_stats = total_buy > 0 or total_sales > 0
+
     return render_template(
         'revision/index.html',
-        total_buy=round(total_buy),
-        total_sales=total_sales,
-        total_quantity_sold=total_quantity_sold,
-        total_sales_revenue=round(total_sales_revenue),
-        from_date=from_date,
-        to_date=to_date,
+        stats=stats if show_stats else None,
+        snapshot_date=snapshot_date
     )
+
+
 
 if __name__ == '__main__':
     init_db()
