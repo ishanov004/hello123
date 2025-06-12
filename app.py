@@ -23,6 +23,12 @@ def init_db():
         )
     ''')
     cur.execute('''
+        CREATE TABLE IF NOT EXISTS countries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE
+        )
+    ''')
+    cur.execute('''
         CREATE TABLE IF NOT EXISTS equipment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -68,6 +74,7 @@ def buy_index():
 def buy_add():
     conn = get_db_connection()
     categories = conn.execute('SELECT * FROM categories').fetchall()
+    countries = conn.execute('SELECT * FROM countries').fetchall()
     if request.method == 'POST':
         name = request.form['name']
         category_id = request.form['category']
@@ -81,13 +88,14 @@ def buy_add():
         conn.commit()
         conn.close()
         return redirect(url_for('buy_index'))
-    return render_template('buy/add.html', categories=categories)
+    return render_template('buy/add.html', categories=categories, countries=countries)
 
 @app.route('/buy/edit/<int:item_id>', methods=['GET', 'POST'])
 def buy_edit(item_id):
     conn = get_db_connection()
     item = conn.execute('SELECT * FROM equipment WHERE id = ?', (item_id,)).fetchone()
     categories = conn.execute('SELECT * FROM categories').fetchall()
+    countries = conn.execute('SELECT * FROM countries').fetchall()
     if request.method == 'POST':
         conn.execute('''
             UPDATE equipment SET name=?, category_id=?, country=?, price=?, delivery=?, date=?, quantity=?
@@ -105,7 +113,7 @@ def buy_edit(item_id):
         conn.commit()
         conn.close()
         return redirect(url_for('buy_index'))
-    return render_template('buy/edit.html', item=item, categories=categories)
+    return render_template('buy/edit.html', item=item, categories=categories, countries=countries)
 
 @app.route('/buy/delete/<int:item_id>', methods=['GET', 'POST'])
 def buy_delete(item_id):
@@ -251,6 +259,59 @@ def categories_delete(category_id):
             return redirect(url_for('categories_delete', category_id=category_id))
     return render_template('categories/confirm_delete.html', category_id=category_id)
 
+# Countries
+@app.route('/countries')
+def countries_index():
+    """Display list of countries and counts of equipment."""
+    conn = get_db_connection()
+    countries = conn.execute(
+        """
+        SELECT c.id, c.name, COUNT(e.id) AS count
+        FROM countries c
+        LEFT JOIN equipment e ON e.country = c.name
+        GROUP BY c.id, c.name
+        """
+    ).fetchall()
+    conn.close()
+    return render_template('countries/index.html', countries=countries)
+
+
+@app.route('/countries/add', methods=['GET', 'POST'])
+def countries_add():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name'].strip()
+        if name:
+            conn.execute('INSERT INTO countries (name) VALUES (?)', (name,))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('countries_index'))
+    conn.close()
+    return render_template('countries/add.html')
+
+
+@app.route('/countries/delete/<int:country_id>', methods=['GET', 'POST'])
+def countries_delete(country_id):
+    if request.method == 'POST':
+        code = request.form.get('code')
+        if code == os.getenv('DELETE_SECRET'):
+            conn = get_db_connection()
+            country = conn.execute('SELECT name FROM countries WHERE id=?', (country_id,)).fetchone()
+            if country:
+                count = conn.execute('SELECT COUNT(*) FROM equipment WHERE country=?', (country['name'],)).fetchone()[0]
+                if count > 0:
+                    flash('Нельзя удалить страну, связанную с оборудованием')
+                    conn.close()
+                    return redirect(url_for('countries_delete', country_id=country_id))
+                conn.execute('DELETE FROM countries WHERE id=?', (country_id,))
+                conn.commit()
+            conn.close()
+            return redirect(url_for('countries_index'))
+        else:
+            flash('Неверный код удаления')
+            return redirect(url_for('countries_delete', country_id=country_id))
+    return render_template('countries/confirm_delete.html', country_id=country_id)
+
 @app.route('/warehouse')
 def warehouse_index():
     conn = get_db_connection()
@@ -297,13 +358,15 @@ def revision_index():
     total_sales_revenue = conn.execute(sales_revenue_query, params).fetchone()[0] or 0
 
     conn.close()
-    return render_template('revision/index.html',
-                           total_buy=round(total_buy, 2),
-                           total_sales=total_sales,
-                           total_quantity_sold=total_quantity_sold,
-                           total_sales_revenue=round(total_sales_revenue, 2),
-                           from_date=from_date,
-                           to_date=to_date)
+    return render_template(
+        'revision/index.html',
+        total_buy=round(total_buy),
+        total_sales=total_sales,
+        total_quantity_sold=total_quantity_sold,
+        total_sales_revenue=round(total_sales_revenue),
+        from_date=from_date,
+        to_date=to_date,
+    )
 
 if __name__ == '__main__':
     init_db()
