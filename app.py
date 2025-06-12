@@ -42,6 +42,16 @@ def init_db():
         )
     ''')
 
+    # New table to keep warehouse stock separate from purchases
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS stock (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            equipment_id INTEGER,
+            quantity INTEGER,
+            FOREIGN KEY (equipment_id) REFERENCES equipment(id)
+        )
+    ''')
+
     # === New: Stock snapshots table ===
     cur.execute('''
         CREATE TABLE IF NOT EXISTS stock_snapshots (
@@ -96,32 +106,11 @@ def buy_index():
     return render_template('buy/index.html', items=items)
 
 @app.route('/buy/add', methods=['GET', 'POST'])
-@app.route('/buy/add', methods=['GET', 'POST'])
 def buy_add():
     conn = get_db_connection()
     categories = conn.execute('SELECT * FROM categories').fetchall()
     countries = conn.execute('SELECT * FROM countries').fetchall()
-    if request.method == 'POST':
-        name = request.form['name']
-        category_id = request.form['category']
-        country = request.form['country']
-        price = request.form['price']
-        delivery = request.form['delivery']
-        date = request.form['date']
-        quantity = request.form['quantity']
-        conn.execute(
-            'INSERT INTO equipment (name, category_id, country, price, delivery, date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            (name, category_id, country, price, delivery, date, quantity)
-        )
-        conn.commit()
-        conn.close()
-        flash('Закупка добавлена!')
-        return redirect(url_for('buy_index'))
-    conn.close()
-    return render_template('buy/add.html', categories=categories, countries=countries)
-    conn = get_db_connection()
-    categories = conn.execute('SELECT * FROM categories').fetchall()
-    countries = conn.execute('SELECT * FROM countries').fetchall()
+
     if request.method == 'POST':
         name = request.form['name']
         category_id = request.form['category']
@@ -130,14 +119,24 @@ def buy_add():
         delivery = float(request.form['delivery'])
         date = request.form['date']
         quantity = int(request.form['quantity'])
-    conn.execute('INSERT INTO equipment (name, category_id, country, price, delivery, date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                 (name, category_id, country, price, delivery, date, quantity))  # <- end of INSERT
-    equipment_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
-    conn.execute('INSERT INTO history (item_id, action, quantity, price, date) VALUES (?, ?, ?, ?, ?)',
-                 (equipment_id, 'buy', quantity, price, date))
-    conn.commit()
+
+        cur = conn.cursor()
+        cur.execute(
+            'INSERT INTO equipment (name, category_id, country, price, delivery, date, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            (name, category_id, country, price, delivery, date, quantity)
+        )
+        equipment_id = cur.lastrowid
+        cur.execute(
+            'INSERT INTO history (item_id, action, quantity, price, date) VALUES (?, ?, ?, ?, ?)',
+            (equipment_id, 'buy', quantity, price, date)
+        )
+        cur.execute('INSERT INTO stock (equipment_id, quantity) VALUES (?, ?)', (equipment_id, quantity))
+        conn.commit()
+        conn.close()
+        flash('Закупка добавлена!')
+        return redirect(url_for('buy_index'))
+
     conn.close()
-    return redirect(url_for('buy_index'))
     return render_template('buy/add.html', categories=categories, countries=countries)
 
 @app.route('/buy/edit/<int:item_id>', methods=['GET', 'POST'])
@@ -194,16 +193,22 @@ def sales_index():
 @app.route('/sales/add', methods=['GET', 'POST'])
 def sales_add():
     conn = get_db_connection()
-    equipment = conn.execute('SELECT * FROM equipment WHERE quantity > 0').fetchall()
+    equipment = conn.execute('''
+        SELECT s.id AS stock_id, e.id AS equipment_id, e.name, s.quantity
+        FROM stock s
+        JOIN equipment e ON s.equipment_id = e.id
+        WHERE s.quantity > 0
+    ''').fetchall()
     categories = conn.execute('SELECT * FROM categories').fetchall()
     if request.method == 'POST':
-        equipment_id = int(request.form['equipment'])
+        stock_id = int(request.form['equipment'])
         category_id = int(request.form['category'])
         date = request.form['date']
         quantity = int(request.form['quantity'])
         price = float(request.form['price'])
-        item = conn.execute('SELECT quantity FROM equipment WHERE id = ?', (equipment_id,)).fetchone()
-        if item and item['quantity'] >= quantity:
+        stock_row = conn.execute('SELECT quantity, equipment_id FROM stock WHERE id = ?', (stock_id,)).fetchone()
+        if stock_row and stock_row['quantity'] >= quantity:
+            equipment_id = stock_row['equipment_id']
             conn.execute(
                 'INSERT INTO sales (equipment_id, category_id, date, quantity, price) VALUES (?, ?, ?, ?, ?)',
                 (equipment_id, category_id, date, quantity, price)
@@ -213,14 +218,14 @@ def sales_add():
                 (equipment_id, 'sell', quantity, price, date)
             )
             conn.execute(
-                'UPDATE equipment SET quantity = quantity - ? WHERE id = ?',
-                (quantity, equipment_id)
+                'UPDATE stock SET quantity = quantity - ? WHERE id = ?',
+                (quantity, stock_id)
             )
             conn.commit()
             conn.close()
             return redirect(url_for('sales_index'))
         else:
-            flash(f'Ошибка: на складе только {item["quantity"] if item else 0} шт.')
+            flash(f'Ошибка: на складе только {stock_row["quantity"] if stock_row else 0} шт.')
             conn.close()
             return redirect(url_for('sales_add'))
     conn.close()
@@ -377,21 +382,26 @@ def countries_delete(country_id):
 def warehouse_index():
     conn = get_db_connection()
     items = conn.execute('''
-        SELECT e.id, e.name AS name, e.quantity, c.name AS category_name
-        FROM equipment e
+        SELECT s.id, e.name AS name, s.quantity, c.name AS category_name
+        FROM stock s
+        JOIN equipment e ON s.equipment_id = e.id
         LEFT JOIN categories c ON e.category_id = c.id
-        WHERE e.quantity > 0
+        WHERE s.quantity > 0
     ''').fetchall()
     conn.close()
     return render_template('warehouse/index.html', items=items)
 
-@app.route('/warehouse/edit/<int:item_id>', methods=['GET', 'POST'])
-def warehouse_edit(item_id):
+@app.route('/warehouse/edit/<int:stock_id>', methods=['GET', 'POST'])
+def warehouse_edit(stock_id):
     conn = get_db_connection()
-    item = conn.execute('SELECT * FROM equipment WHERE id=?', (item_id,)).fetchone()
+    item = conn.execute('''
+        SELECT s.id, s.quantity, e.name
+        FROM stock s JOIN equipment e ON s.equipment_id = e.id
+        WHERE s.id=?
+    ''', (stock_id,)).fetchone()
     if request.method == 'POST':
         quantity = int(request.form['quantity'])
-        conn.execute('UPDATE equipment SET quantity=? WHERE id=?', (quantity, item_id))
+        conn.execute('UPDATE stock SET quantity=? WHERE id=?', (quantity, stock_id))
         conn.commit()
         conn.close()
         return redirect(url_for('warehouse_index'))
