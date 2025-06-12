@@ -270,8 +270,7 @@ def countries_index():
         FROM countries c
         LEFT JOIN equipment e ON e.country = c.name
         GROUP BY c.id, c.name
-        """
-    """Display list of distinct countries from equipment.""")
+        """)
     conn = get_db_connection()
     countries = conn.execute(
         "SELECT country, COUNT(*) AS count FROM equipment "
