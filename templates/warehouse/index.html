@@ -11,7 +11,6 @@
                 <th>Товар</th>
                 <th>Категория</th>
                 <th>Количество</th>
-                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -20,10 +19,6 @@
                 <td>{{ item.name }}</td>
                 <td>{{ item.category_name }}</td>
                 <td>{{ item.quantity }}</td>
-                <td>
-                    <a href="{{ url_for('warehouse_edit', stock_id=item['id']) }}" class="button-link">Изменить</a>
-                    <a href="{{ url_for('warehouse_edit', item_id=item['id']) }}" class="button-link">Изменить</a>
-                </td>
             </tr>
             {% endfor %}
         </tbody>

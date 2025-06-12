@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
 import os
 from dotenv import load_dotenv
-from datetime import datetime
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('DELETE_SECRET', os.urandom(24).hex())
@@ -379,30 +378,19 @@ def countries_delete(country_id):
     return render_template('countries/confirm_delete.html', country_id=country_id)
 
 @app.route('/warehouse')
+@app.route('/warehouse')
 def warehouse_index():
     conn = get_db_connection()
     items = conn.execute('''
         SELECT s.id, e.name AS name, s.quantity, c.name AS category_name
         FROM stock s
         JOIN equipment e ON s.equipment_id = e.id
-        SELECT e.id, e.name AS name, e.quantity, c.name AS category_name
-        FROM equipment e
         LEFT JOIN categories c ON e.category_id = c.id
         WHERE s.quantity > 0
     ''').fetchall()
     conn.close()
     return render_template('warehouse/index.html', items=items)
-@app.route('/warehouse/edit/<int:stock_id>', methods=['GET', 'POST'])
-def warehouse_edit(stock_id):
-    conn = get_db_connection()
-    item = conn.execute('''
-        SELECT s.id, s.quantity, e.name
-        FROM stock s JOIN equipment e ON s.equipment_id = e.id
-        WHERE s.id=?
-    ''', (stock_id,)).fetchone()
-    if request.method == 'POST':
-        quantity = int(request.form['quantity'])
-        conn.execute('UPDATE stock SET quantity=? WHERE id=?', (quantity, stock_id))
+# Removed duplicate and incomplete warehouse_edit for stock_id
 @app.route('/warehouse/edit/<int:item_id>', methods=['GET', 'POST'])
 def warehouse_edit(item_id):
     conn = get_db_connection()
