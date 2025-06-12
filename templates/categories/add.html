@@ -3,11 +3,18 @@
 {% block title %}Добавить категорию{% endblock %}
 
 {% block content %}
-<h1>Добавить категорию</h1>
+<div class="content-card">
+    <h1 class="welcome-title">📂 Добавить категорию</h1>
 
-<form method="POST">
-    <label for="name">Название категории</label>
-    <input type="text" id="name" name="name" required>
-    <button type="submit">Добавить</button>
-</form>
+    <form method="POST" class="form-grid">
+        <div class="form-group">
+            <label for="name">Название категории</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="nav-button">➕ Добавить</button>
+        </div>
+    </form>
+</div>
 {% endblock %}
