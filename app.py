@@ -251,6 +251,19 @@ def categories_delete(category_id):
             return redirect(url_for('categories_delete', category_id=category_id))
     return render_template('categories/confirm_delete.html', category_id=category_id)
 
+# Countries
+@app.route('/countries')
+def countries_index():
+    """Display list of distinct countries from equipment."""
+    conn = get_db_connection()
+    countries = conn.execute(
+        "SELECT country, COUNT(*) AS count FROM equipment "
+        "WHERE country IS NOT NULL AND TRIM(country) <> '' "
+        "GROUP BY country"
+    ).fetchall()
+    conn.close()
+    return render_template('countries/index.html', countries=countries)
+
 @app.route('/warehouse')
 def warehouse_index():
     conn = get_db_connection()
