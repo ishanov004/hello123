@@ -3,9 +3,10 @@
 {% block title %}Добавить закупку{% endblock %}
 
 {% block content %}
-<h1>Добавить закупку</h1>
+<div class="content-card">
+    <h1 class="welcome-title">➕ Добавить закупку</h1>
 
-<form method="POST" class="form-grid">
+    <form method="POST" class="form-grid">
     <div class="form-group">
         <label for="name">Название товара</label>
         <input type="text" id="name" name="name" required>
@@ -45,9 +46,11 @@
         <input type="number" id="quantity" name="quantity" required>
     </div>
 
-    <div class="form-group">
-        <label>&nbsp;</label>
-        <button type="submit">Добавить</button>
-    </div>
-</form>
+        <div class="form-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="nav-button">➕ Добавить</button>
+        </div>
+    </form>
+</div>
 {% endblock %}
+
