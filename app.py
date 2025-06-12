@@ -261,7 +261,23 @@ def categories_delete(category_id):
 
 # Countries
 @app.route('/countries')
+@app.route('/countries')
 def countries_index():
+    """
+    Display the list of countries from the database with the number of equipment items linked to each.
+    Uses LEFT JOIN to include countries even if they have no equipment yet.
+    """
+    conn = get_db_connection()
+    countries = conn.execute('''
+        SELECT c.id, c.name, COUNT(e.id) AS equipment_count
+        FROM countries c
+        LEFT JOIN equipment e ON c.name = e.country
+        GROUP BY c.id, c.name
+        ORDER BY c.name
+    ''').fetchall()
+    conn.close()
+    return render_template('countries/index.html', countries=countries)
+
     """Display list of countries and counts of equipment."""
     conn = get_db_connection()
     countries = conn.execute(
