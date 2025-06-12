@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block title %}Редактировать категорию{% endblock %}
+
+{% block content %}
+<h1>Редактировать категорию</h1>
+
+<form method="POST">
+    <label for="name">Название категории</label>
+    <input type="text" id="name" name="name" value="{{ category.name }}" required>
+    <button type="submit">Сохранить</button>
+</form>
+<a href="{{ url_for('categories_index') }}" class="button-link">Отмена</a>
+{% endblock %}

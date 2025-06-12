@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Система управления складом{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <ul class="navbar">
+        <li><a href="{{ url_for('home') }}">Главная</a></li>
+        <li><a href="{{ url_for('warehouse_index') }}">Склад</a></li>
+        <li><a href="{{ url_for('buy_index') }}">Закупки</a></li>
+        <li><a href="{{ url_for('sales_index') }}">Продажи</a></li>
+        <li><a href="{{ url_for('categories_index') }}">Категории</a></li>
+        <li><a href="{{ url_for('revision_index') }}">Ревизия</a></li>
+    </ul>
+
+    {% with flash_messages = get_flashed_messages() %}
+        {% if flash_messages %}
+            <div class="error">
+                {% for message in flash_messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>

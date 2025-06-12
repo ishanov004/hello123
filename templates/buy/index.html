@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+
+{% block title %}Закупки{% endblock %}
+
+{% block content %}
+<h1>Закупки</h1>
+
+<a href="{{ url_for('buy_add') }}" class="button-link">Добавить закупку</a>
+
+<!-- 🔍 Поиск и фильтры -->
+<input type="text" id="searchInput" onkeyup="searchTable('searchInput', 'buyTable')" placeholder="Поиск по товару...">
+<input type="date" id="fromDate" onchange="filterByDate()" placeholder="От даты">
+<input type="date" id="toDate" onchange="filterByDate()" placeholder="До даты">
+
+<table border="1" id="buyTable">
+    <thead>
+        <tr>
+            <th>Товар</th>
+            <th>Категория</th>
+            <th>Страна</th>
+            <th>Цена</th>
+            <th>Доставка</th>
+            <th>Дата</th>
+            <th>Количество</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.country }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.delivery }}</td>
+            <td data-date="{{ item.date }}">{{ item.date }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>
+                <a href="{{ url_for('buy_edit', item_id=item.id) }}" class="button-link">Редактировать</a>
+                <a href="{{ url_for('buy_delete', item_id=item.id) }}" class="button-link">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script src="{{ url_for('static', filename='js/filters.js') }}"></script>
+{% endblock %}

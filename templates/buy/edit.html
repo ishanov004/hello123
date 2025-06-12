@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+{% block title %}Редактировать закупку{% endblock %}
+
+{% block content %}
+<h1>Редактировать закупку</h1>
+
+<form method="POST">
+    <label for="name">Название товара</label>
+    <input type="text" id="name" name="name" value="{{ item.name }}" required>
+
+    <label for="category">Категория</label>
+    <select id="category" name="category" required>
+        {% for cat in categories %}
+        <option value="{{ cat.id }}" {% if cat.id == item.category_id %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="country">Страна</label>
+    <input type="text" id="country" name="country" value="{{ item.country }}">
+
+    <label for="price">Цена</label>
+    <input type="number" id="price" name="price" step="0.01" value="{{ item.price }}" required>
+
+    <label for="delivery">Стоимость доставки</label>
+    <input type="number" id="delivery" name="delivery" step="0.01" value="{{ item.delivery }}" required>
+
+    <label for="date">Дата</label>
+    <input type="date" id="date" name="date" value="{{ item.date }}" required>
+
+    <label for="quantity">Количество</label>
+    <input type="number" id="quantity" name="quantity" value="{{ item.quantity }}" required>
+
+    <button type="submit">Сохранить</button>
+</form>
+{% endblock %}

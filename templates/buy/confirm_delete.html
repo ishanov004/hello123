@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block title %}Подтверждение удаления{% endblock %}
+
+{% block content %}
+<h1>Подтверждение удаления</h1>
+<p>Введите код для удаления закупки:</p>
+
+{% if flash_messages %}
+<div class="error">
+    {% for message in get_flashed_messages() %}
+    {{ message }}
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="POST">
+    <label for="code">Код удаления</label>
+    <input type="text" id="code" name="code" required>
+    <button type="submit">Удалить</button>
+</form>
+<a href="{{ url_for('buy_index') }}" class="button-link">Отмена</a>
+{% endblock %}

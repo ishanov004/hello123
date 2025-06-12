@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block title %}Продажи{% endblock %}
+
+{% block content %}
+<h1>Продажи</h1>
+
+<a href="{{ url_for('sales_add') }}" class="button-link">Добавить продажу</a>
+
+<input type="text" id="searchInput" onkeyup="searchTable('searchInput', 'salesTable')" placeholder="Поиск по товару...">
+<input type="date" id="fromDate" onchange="filterByDate()" placeholder="От даты">
+<input type="date" id="toDate" onchange="filterByDate()" placeholder="До даты">
+
+<table border="1" id="salesTable">
+    <thead>
+        <tr>
+            <th>Товар</th>
+            <th>Категория</th>
+            <th>Дата</th>
+            <th>Количество</th>
+            <th>Цена</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sale in sales %}
+        <tr>
+            <td>{{ sale.equipment }}</td>
+            <td>{{ sale.category }}</td>
+            <td data-date="{{ sale.date }}">{{ sale.date }}</td>
+            <td>{{ sale.quantity }}</td>
+            <td>{{ sale.price }}</td>
+            <td>
+                <a href="{{ url_for('sales_edit', sale_id=sale.id) }}" class="button-link">Редактировать</a>
+                <a href="{{ url_for('sales_delete', sale_id=sale.id) }}" class="button-link">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script src="{{ url_for('static', filename='js/filters.js') }}"></script>
+{% endblock %}

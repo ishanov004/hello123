@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <h1 class="welcome-title">📦 Добро пожаловать в систему управления складом 📦</h1>
+    <p class="welcome-text">Выберите раздел для работы 🚀</p>
+    <div class="nav-grid">
+        <a href="{{ url_for('warehouse_index') }}" class="nav-button">📋 Склад</a>
+        <a href="{{ url_for('buy_index') }}" class="nav-button">➕ Закупки</a>
+        <a href="{{ url_for('sales_index') }}" class="nav-button">💰 Продажи</a>
+        <a href="{{ url_for('categories_index') }}" class="nav-button">📂 Категории</a>
+        <a href="{{ url_for('revision_index') }}" class="nav-button">📊 Ревизия</a>
+    </div>
+</div>
+{% endblock %}
