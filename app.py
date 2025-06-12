@@ -261,7 +261,6 @@ def categories_delete(category_id):
 
 # Countries
 @app.route('/countries')
-@app.route('/countries')
 def countries_index():
     """
     Display the list of countries from the database with the number of equipment items linked to each.
