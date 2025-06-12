@@ -23,7 +23,11 @@
 
     <div class="form-group">
         <label for="country">Страна</label>
-        <input type="text" id="country" name="country">
+        <select id="country" name="country">
+            {% for c in countries %}
+            <option value="{{ c.name }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
     </div>
 
     <div class="form-group">
