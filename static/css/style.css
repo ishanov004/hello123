@@ -1,4 +1,3 @@
-
 /* Общие стили */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -272,3 +271,270 @@ input, select {
     border-left: 5px solid #f44336;
     margin-bottom: 10px;
 }
+
+/* === История продаж: улучшенное выравнивание формы === */
+.form-grid.history-filter {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 16px;
+    align-items: end;
+}
+
+@media (max-width: 768px) {
+    .form-grid.history-filter {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* === Улучшенная кнопка поиска в фильтре === */
+.btn.search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    background-color: #3498db;
+    border-radius: 10px;
+    font-size: 18px;
+    line-height: 1;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: none;
+}
+
+.btn.search-btn:hover {
+    background-color: #2c80b4;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .btn.search-btn {
+        width: 100%;
+    }
+}
+
+/* === Верхнее выравнивание кнопки поиска с полями === */
+.form-grid.align-top,
+.form-grid.history-filter.align-top {
+    align-items: start;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .form-grid.align-top {
+        align-items: stretch;
+    }
+}
+
+/* === Стиль логина в Instagram-стиле === */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.login-form {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-title {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.login-form input {
+    padding: 14px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.login-form input:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 4px rgba(52, 152, 219, 0.3);
+}
+
+.login-btn {
+    padding: 12px;
+    background: #3498db;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.login-btn:hover {
+    background-color: #2c80b4;
+    transform: translateY(-1px);
+}
+
+/* === Мобильная адаптация формы логина и фильтров === */
+@media (max-width: 480px) {
+    .login-form {
+        padding: 20px;
+        max-width: 90%;
+    }
+
+    .login-title {
+        font-size: 22px;
+    }
+
+    .login-form input {
+        padding: 10px;
+        font-size: 15px;
+    }
+
+    .login-btn {
+        padding: 10px;
+        font-size: 15px;
+    }
+
+    .form-grid.history-filter,
+    .form-grid.align-top,
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .btn.search-btn {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    table th, table td {
+        font-size: 14px;
+        padding: 10px 8px;
+    }
+}
+
+/* === Мобильная адаптация кнопок === */
+@media (max-width: 480px) {
+    button, .btn, .login-btn, .btn.search-btn {
+        width: 100%;
+        font-size: 16px;
+        padding: 14px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .small-btn {
+        padding: 12px;
+        font-size: 15px;
+        width: 100%;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+}
+
+/* === Мобильное меню: красивое раскрытие === */
+@media (max-width: 768px) {
+    .nav-links {
+        background-color: #1f2d3d;
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        z-index: 999;
+    }
+
+    .nav-links a {
+        display: block;
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        color: #ecf0f1;
+        border-radius: 10px;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+        background-color: #3498db;
+        color: white;
+    }
+}
+
+/* === Улучшенное мобильное меню с тенью и скруглением === */
+@media (max-width: 768px) {
+    .nav-links {
+        background-color: #1f2d3d;
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .nav-links.active {
+        max-height: 500px;
+    }
+
+    .nav-links a {
+        display: block;
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        color: #ecf0f1;
+        border-radius: 8px;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+        background-color: #3498db;
+        color: white;
+    }
+}
+/* Overlay при открытом меню */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 998;
+    transition: opacity 0.3s ease;
+}
+
+.overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+/* Анимация для бургер-меню */

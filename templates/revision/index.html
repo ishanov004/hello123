@@ -8,20 +8,12 @@
     <h1 class="welcome-title">📊 Финансовый отчёт</h1>
 
 <!-- 🔍 Поиск по дате -->
-<form method="get" action="{{ url_for('revision_index') }}" class="form-grid filter-section">
-    <div class="form-group">
-        <label for="snapshot_date">Дата:</label>
-        <input type="date" id="snapshot_date" name="snapshot_date" value="{{ snapshot_date }}">
-    </div>
-    <div class="form-group">
-        <label>&nbsp;</label>
-        <button type="submit" class="btn small-btn">🔍</button>
-    </div>
-    <div class="form-group ">
-        <label>&nbsp;</label>
-        <a href="{{ url_for('revision_index') }}" class="btn">↻</a>
-    </div>
+<form method="get" action="{{ url_for('revision_index') }}" class="filter-form">
+    <input type="date" id="snapshot_date" name="snapshot_date" value="{{ snapshot_date }}">
+    <button type="submit" class="btn icon-btn">🔍</button>
+    <a href="{{ url_for('revision_index') }}" class="btn icon-btn">↻</a>
 </form>
+
 
 {% if stats %}
 <div class="stats-grid">

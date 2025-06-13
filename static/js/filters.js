@@ -1,7 +1,7 @@
 // 🔍 Фильтр по дате (между двумя значениями)
 function filterByDate() {
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
+    const from = document.getElementById("from").value;
+    const to = document.getElementById("to").value;
     const rows = document.querySelectorAll("table tbody tr");
 
     rows.forEach(row => {
@@ -9,8 +9,8 @@ function filterByDate() {
         if (!dateCell) return;
 
         const date = new Date(dateCell.getAttribute("data-date"));
-        const from = fromDate ? new Date(fromDate) : null;
-        const to = toDate ? new Date(toDate) : null;
+        const from = from ? new Date(from) : null;
+        const to = to ? new Date(to) : null;
 
         let show = true;
         if (from && date < from) show = false;
