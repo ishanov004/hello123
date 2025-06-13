@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import sqlite3
 import os
 from dotenv import load_dotenv
+from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('DELETE_SECRET', os.urandom(24).hex())
@@ -11,6 +13,25 @@ def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def role_required(*roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if session.get('role') not in roles:
+                flash('Недостаточно прав')
+                return redirect(url_for('home'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 def init_db():
     conn = get_db_connection()
@@ -87,14 +108,31 @@ def init_db():
             FOREIGN KEY (category_id) REFERENCES categories (id)
         )
     ''')
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT,
+            role TEXT
+        )
+    ''')
+    exists = cur.execute('SELECT COUNT(*) FROM users WHERE username=?', ('ishanov',)).fetchone()[0]
+    if exists == 0:
+        cur.execute(
+            'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+            ('ishanov', generate_password_hash("root@2024"), 'superadmin')
+        )
     conn.commit()
     conn.close()
 
 @app.route('/')
+@login_required
 def home():
     return render_template('index.html')
 
 @app.route('/buy')
+@login_required
+@role_required('admin', 'superadmin')
 def buy_index():
     conn = get_db_connection()
     items = conn.execute('''
@@ -105,6 +143,8 @@ def buy_index():
     return render_template('buy/index.html', items=items)
 
 @app.route('/buy/add', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def buy_add():
     conn = get_db_connection()
     categories = conn.execute('SELECT * FROM categories').fetchall()
@@ -139,6 +179,8 @@ def buy_add():
     return render_template('buy/add.html', categories=categories, countries=countries)
 
 @app.route('/buy/edit/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def buy_edit(item_id):
     conn = get_db_connection()
     item = conn.execute('SELECT * FROM equipment WHERE id = ?', (item_id,)).fetchone()
@@ -163,6 +205,8 @@ def buy_edit(item_id):
     return render_template('buy/edit.html', item=item, categories=categories, countries=countries)
 
 @app.route('/buy/delete/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def buy_delete(item_id):
     if request.method == 'POST':
         code = request.form.get('code')
@@ -178,6 +222,8 @@ def buy_delete(item_id):
     return render_template('buy/confirm_delete.html', item_id=item_id)
 
 @app.route('/sales')
+@login_required
+@role_required('admin', 'superadmin')
 def sales_index():
     conn = get_db_connection()
     sales = conn.execute('''
@@ -190,6 +236,8 @@ def sales_index():
     return render_template('sales/index.html', sales=sales)
 
 @app.route('/sales/add', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def sales_add():
     conn = get_db_connection()
     equipment = conn.execute('''
@@ -231,6 +279,8 @@ def sales_add():
     return render_template('sales/add.html', equipment=equipment, categories=categories)
 
 @app.route('/sales/edit/<int:sale_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def sales_edit(sale_id):
     conn = get_db_connection()
     sale = conn.execute('SELECT * FROM sales WHERE id = ?', (sale_id,)).fetchone()
@@ -250,6 +300,8 @@ def sales_edit(sale_id):
     return render_template('sales/edit.html', sale=sale, equipment=equipment, categories=categories)
 
 @app.route('/sales/delete/<int:sale_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def sales_delete(sale_id):
     if request.method == 'POST':
         code = request.form.get('code')
@@ -265,6 +317,8 @@ def sales_delete(sale_id):
     return render_template('sales/confirm_delete.html', sale_id=sale_id)
 
 @app.route('/categories')
+@login_required
+@role_required('admin', 'superadmin')
 def categories_index():
     conn = get_db_connection()
     categories = conn.execute('SELECT * FROM categories').fetchall()
@@ -272,6 +326,8 @@ def categories_index():
     return render_template('categories/index.html', categories=categories)
 
 @app.route('/categories/add', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def categories_add():
     if request.method == 'POST':
         name = request.form['name'].strip().lower()  # Normalize name for case-insensitive check
@@ -290,6 +346,8 @@ def categories_add():
     return render_template('categories/add.html')
 
 @app.route('/categories/edit/<int:category_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def categories_edit(category_id):
     conn = get_db_connection()
     category = conn.execute('SELECT * FROM categories WHERE id = ?', (category_id,)).fetchone()
@@ -303,6 +361,8 @@ def categories_edit(category_id):
     return render_template('categories/edit.html', category=category)
 
 @app.route('/categories/delete/<int:category_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def categories_delete(category_id):
     if request.method == 'POST':
         code = request.form.get('code')
@@ -325,6 +385,7 @@ def categories_delete(category_id):
 
 # Countries
 @app.route('/countries')
+@login_required
 def countries_index():
     """
     Display the list of countries from the database with the number of equipment items linked to each.
@@ -342,6 +403,8 @@ def countries_index():
     return render_template('countries/index.html', countries=countries)
 
 @app.route('/countries/add', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def countries_add():
     conn = get_db_connection()
     if request.method == 'POST':
@@ -356,6 +419,8 @@ def countries_add():
 
 
 @app.route('/countries/delete/<int:country_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def countries_delete(country_id):
     if request.method == 'POST':
         code = request.form.get('code')
@@ -379,6 +444,8 @@ def countries_delete(country_id):
 
 @app.route('/warehouse')
 @app.route('/warehouse')
+@login_required
+@role_required('admin', 'superadmin', 'viewer')
 def warehouse_index():
     conn = get_db_connection()
     items = conn.execute('''
@@ -392,6 +459,8 @@ def warehouse_index():
     return render_template('warehouse/index.html', items=items)
 # Removed duplicate and incomplete warehouse_edit for stock_id
 @app.route('/warehouse/edit/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'superadmin')
 def warehouse_edit(item_id):
     conn = get_db_connection()
     item = conn.execute('SELECT * FROM equipment WHERE id=?', (item_id,)).fetchone()
@@ -405,6 +474,8 @@ def warehouse_edit(item_id):
     return render_template('warehouse/edit.html', item=item)
 
 @app.route('/revision')
+@login_required
+@role_required('admin', 'superadmin', 'viewer')
 def revision_index():
     conn = get_db_connection()
     from_date = request.args.get('from_date')
@@ -450,6 +521,8 @@ def revision_index():
 
 
 @app.route('/history')
+@login_required
+@role_required('admin', 'superadmin', 'viewer')
 def history_index():
     conn = get_db_connection()
     from_date = request.args.get('from')
@@ -478,6 +551,105 @@ def history_index():
     rows = conn.execute(query, params).fetchall()
     conn.close()
     return render_template('history/index.html', rows=rows, from_date=from_date, to_date=to_date)
+
+
+# === Authentication ===
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE username=?', (username,)).fetchone()
+        conn.close()
+        if user and check_password_hash(user['password'], password):
+            session['username'] = user['username']
+            session['role'] = user['role']
+            return redirect(url_for('home'))
+        flash('Неверный логин или пароль')
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
+# === User management (superadmin only) ===
+
+@app.route('/users')
+@login_required
+@role_required('superadmin')
+def users_index():
+    conn = get_db_connection()
+    users = conn.execute('SELECT id, username, role FROM users').fetchall()
+    conn.close()
+    return render_template('users/index.html', users=users)
+
+
+@app.route('/users/add', methods=['GET', 'POST'])
+@login_required
+@role_required('superadmin')
+def users_add():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        role = request.form['role']
+        conn = get_db_connection()
+        conn.execute(
+            'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+            (username, generate_password_hash(password), role)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('users_index'))
+    return render_template('users/add.html')
+
+
+@app.route('/users/edit/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('superadmin')
+def users_edit(user_id):
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE id=?', (user_id,)).fetchone()
+    if not user:
+        conn.close()
+        flash('Пользователь не найден')
+        return redirect(url_for('users_index'))
+    if request.method == 'POST':
+        password = request.form['password']
+        role = request.form['role']
+        conn.execute('UPDATE users SET password=?, role=? WHERE id=?', (generate_password_hash(password), role, user_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('users_index'))
+    conn.close()
+    return render_template('users/edit.html', user=user)
+
+
+@app.route('/users/delete/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('superadmin')
+def users_delete(user_id):
+    conn = get_db_connection()
+    user = conn.execute('SELECT username FROM users WHERE id=?', (user_id,)).fetchone()
+    if not user:
+        conn.close()
+        flash('Пользователь не найден')
+        return redirect(url_for('users_index'))
+    if user['username'] == 'ishanov':
+        conn.close()
+        flash('Нельзя удалить главного администратора')
+        return redirect(url_for('users_index'))
+    if request.method == 'POST':
+        conn.execute('DELETE FROM users WHERE id=?', (user_id,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('users_index'))
+    conn.close()
+    return render_template('users/confirm_delete.html', user=user)
 
 
 

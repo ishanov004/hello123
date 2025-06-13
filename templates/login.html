@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="content-card">
+    <h1 class="welcome-title">🔐 Вход</h1>
+    <form method="post" class="form-grid">
+        <div class="form-group">
+            <label>Логин</label>
+            <input type="text" name="username" required>
+        </div>
+        <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="nav-button">Войти</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -5,7 +5,9 @@
 {% block content %}
 <div class="content-card">
     <h1 class="welcome-title">📥 Закупки</h1>
+    {% if session.get('role') != 'viewer' %}
     <a href="{{ url_for('buy_add') }}" class="btn">➕ Добавить закупку</a>
+    {% endif %}
     <input type="text" id="searchInput" onkeyup="searchTable('searchInput', 'buyTable')" placeholder="Поиск по товару...">
     <input type="date" id="fromDate" onchange="filterByDate()" placeholder="От даты">
     <input type="date" id="toDate" onchange="filterByDate()" placeholder="До даты">
@@ -19,7 +21,9 @@
                 <th>Доставка</th>
                 <th>Дата</th>
                 <th>Количество</th>
+                {% if session.get('role') != 'viewer' %}
                 <th>Действия</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -32,10 +36,12 @@
                 <td>{{ '{:,.0f}'.format(item.delivery) }} $</td>
                 <td data-date="{{ item.date }}">{{ item.date }}</td>
                 <td>{{ item.quantity }}</td>
+                {% if session.get('role') != 'viewer' %}
                 <td>
                     <a href="{{ url_for('buy_edit', item_id=item.id) }}" class="button-link">Редактировать</a>
                     <a href="{{ url_for('buy_delete', item_id=item.id) }}" class="button-link" onclick="return confirm('Удалить эту закупку?');">Удалить</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
