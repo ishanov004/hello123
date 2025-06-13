@@ -9,6 +9,7 @@
    <a href="{{ url_for('categories_add') }}" class="btn">➕ Добавить категорию</a>
     {% endif %}
     <input type="text" id="searchInput" onkeyup="searchTable('searchInput', 'categoriesTable')" placeholder="Поиск по названию...">
+    <div class="table-responsive">
     <table id="categoriesTable">
         <thead>
             <tr>
@@ -34,6 +35,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     <script src="{{ url_for('static', filename='js/filters.js') }}"></script>
 </div>
 {% endblock %}

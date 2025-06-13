@@ -11,6 +11,7 @@
     <input type="text" id="searchInput" onkeyup="searchTable('searchInput', 'buyTable')" placeholder="Поиск по товару...">
     <input type="date" id="fromDate" onchange="filterByDate()" placeholder="От даты">
     <input type="date" id="toDate" onchange="filterByDate()" placeholder="До даты">
+    <div class="table-responsive">
     <table id="buyTable">
         <thead>
             <tr>
@@ -46,6 +47,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     <script src="{{ url_for('static', filename='js/filters.js') }}"></script>
 </div>
 {% endblock %}

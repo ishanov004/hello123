@@ -69,6 +69,13 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+/* Wide screens */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1400px;
+    }
+}
+
 /* Таблицы */
 table {
     width: 100%;
@@ -84,6 +91,11 @@ th, td {
 
 th {
     background-color: #f1f1f1;
+}
+
+/* Responsive table wrapper */
+.table-responsive {
+    overflow-x: auto;
 }
 /* ...existing code... */
 .button-link {
@@ -204,6 +216,19 @@ input, select {
 
     .nav-links a {
         margin: 5px 0;
+    }
+
+    button,
+    .btn {
+        width: 100%;
+        font-size: 16px;
+        padding: 14px 20px;
+        margin-top: 10px;
+    }
+
+    .small-btn {
+        padding: 10px 14px;
+        font-size: 15px;
     }
 }
 
