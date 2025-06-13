@@ -6,26 +6,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <ul class="navbar">
-        <li><a href="{{ url_for('home') }}">Главная</a></li>
-        <li><a href="{{ url_for('warehouse_index') }}">Склад</a></li>
-        {% if session.get('role') != 'viewer' %}
-        <li><a href="{{ url_for('buy_index') }}">Закупки</a></li>
-        <li><a href="{{ url_for('sales_index') }}">Продажи</a></li>
-        <li><a href="{{ url_for('categories_index') }}">Категории</a></li>
-        <li><a href="{{ url_for('countries_index') }}">Страны</a></li>
-        {% endif %}
-        <li><a href="{{ url_for('revision_index') }}">Ревизия</a></li>
-        <li><a href="{{ url_for('history_index') }}">История</a></li>
-        {% if session.get('username') == 'ishanov' %}
-        <li><a href="{{ url_for('users_index') }}">Пользователи</a></li>
-        {% endif %}
-        {% if session.get('username') %}
-        <li><a href="{{ url_for('logout') }}">Выйти ({{ session['username'] }})</a></li>
-        {% else %}
-        <li><a href="{{ url_for('login') }}">Вход</a></li>
-        {% endif %}
-    </ul>
+    <nav class="navbar">
+        <div class="burger">&#9776;</div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Главная</a></li>
+            <li><a href="{{ url_for('warehouse_index') }}">Склад</a></li>
+            {% if session.get('role') != 'viewer' %}
+            <li><a href="{{ url_for('buy_index') }}">Закупки</a></li>
+            <li><a href="{{ url_for('sales_index') }}">Продажи</a></li>
+            <li><a href="{{ url_for('categories_index') }}">Категории</a></li>
+            <li><a href="{{ url_for('countries_index') }}">Страны</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('revision_index') }}">Ревизия</a></li>
+            <li><a href="{{ url_for('history_index') }}">История</a></li>
+            {% if session.get('username') == 'ishanov' %}
+            <li><a href="{{ url_for('users_index') }}">Пользователи</a></li>
+            {% endif %}
+            {% if session.get('username') %}
+            <li><a href="{{ url_for('logout') }}">Выйти ({{ session['username'] }})</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Вход</a></li>
+            {% endif %}
+        </ul>
+    </nav>
 
     {% with flash_messages = get_flashed_messages() %}
         {% if flash_messages %}
@@ -39,14 +42,14 @@
 
     {% block content %}{% endblock %}
     {% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div class="flash-messages">
-      {% for message in messages %}
-        <div class="alert">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
-
+    {% if messages %}
+      <div class="flash-messages">
+        {% for message in messages %}
+          <div class="alert">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% endwith %}
+    <script src="{{ url_for('static', filename='js/burger.js') }}"></script>
 </body>
 </html>

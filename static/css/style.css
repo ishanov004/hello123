@@ -10,9 +10,8 @@ body {
 
 /* Меню */
 .navbar {
-    flex-wrap: wrap;
     display: flex;
-    justify-content: center;
+    align-items: center;
     background-color: #1f2d3d;
     position: fixed;
     top: 0;
@@ -23,7 +22,21 @@ body {
     z-index: 1000;
 }
 
-.navbar a {
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    list-style: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-links li {
+    list-style: none;
+}
+
+.nav-links a {
     color: #ecf0f1;
     text-decoration: none;
     padding: 10px 20px;
@@ -33,9 +46,17 @@ body {
     font-weight: bold;
 }
 
-.navbar a:hover {
+.nav-links a:hover {
     background-color: #3498db;
     color: white;
+}
+
+.burger {
+    display: none;
+    font-size: 24px;
+    color: #ecf0f1;
+    cursor: pointer;
+    padding: 0 20px;
 }
 
 /* Контейнер страницы */
@@ -165,6 +186,24 @@ input, select {
 
     .nav-grid {
         grid-template-columns: 1fr;
+    }
+
+    .burger {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links a {
+        margin: 5px 0;
     }
 }
 /* Add this to your style.css */
