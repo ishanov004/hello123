@@ -6,7 +6,8 @@
     <title>{% block title %}Система управления складом{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body{% if request.endpoint == 'login' %} class="login-page"{% endif %}>
+    {% if request.endpoint != 'login' %}
     <nav class="navbar">
         <div class="burger">&#9776;</div>
         <ul class="nav-links">
@@ -30,6 +31,7 @@
             {% endif %}
         </ul>
     </nav>
+    {% endif %}
 
     {% with flash_messages = get_flashed_messages() %}
         {% if flash_messages %}
