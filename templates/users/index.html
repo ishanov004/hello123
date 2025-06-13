@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block title %}Пользователи{% endblock %}
+{% block content %}
+<div class="content-card">
+    <h1 class="welcome-title">👥 Пользователи</h1>
+    <a href="{{ url_for('users_add') }}" class="btn">➕ Добавить пользователя</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Логин</th>
+                <th>Роль</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.role }}</td>
+                <td>
+                    <a href="{{ url_for('users_edit', user_id=u.id) }}" class="button-link">Редактировать</a>
+                    {% if u.username != 'ishanov' %}
+                    <a href="{{ url_for('users_delete', user_id=u.id) }}" class="button-link">Удалить</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

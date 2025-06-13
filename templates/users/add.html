@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block title %}Добавить пользователя{% endblock %}
+{% block content %}
+<div class="content-card">
+  <h1 class="welcome-title">➕ Новый пользователь</h1>
+  <form method="post" class="form-grid">
+    <div class="form-group">
+      <label>Логин</label>
+      <input type="text" name="username" required>
+    </div>
+    <div class="form-group">
+      <label>Пароль</label>
+      <input type="password" name="password" required>
+    </div>
+    <div class="form-group">
+      <label>Роль</label>
+      <select name="role">
+        <option value="admin">admin</option>
+        <option value="viewer">viewer</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="nav-button">💾 Сохранить</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

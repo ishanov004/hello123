@@ -6,14 +6,18 @@
 {% block content %}
 <div class="content-card">
     <h1 class="welcome-title">🌍 Страны происхождения</h1>
+    {% if session.get('role') != 'viewer' %}
     <a href="{{ url_for('countries_add') }}" class="btn">➕ Добавить страну</a>
+    {% endif %}
 
     <table>
         <thead>
             <tr>
                 <th>Страна</th>
                 <th>Количество товаров</th>
+                {% if session.get('role') != 'viewer' %}
                 <th>Действия</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -21,9 +25,11 @@
             <tr>
                 <td>{{ c.name }}</td>
                 <td>{{ c.equipment_count }}</td>
+                {% if session.get('role') != 'viewer' %}
                 <td>
                     <a href="{{ url_for('countries_delete', country_id=c.id) }}" class="btn small-btn">Удалить</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
