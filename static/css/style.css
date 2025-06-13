@@ -206,6 +206,54 @@ input, select {
         margin: 5px 0;
     }
 }
+
+/* Планшеты */
+@media (max-width: 900px) {
+    .container {
+        padding: 40px;
+        margin: 20px;
+    }
+
+    .nav-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+}
+
+/* Очень маленькие телефоны */
+@media (max-width: 400px) {
+    .nav-links a {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    .nav-grid a {
+        padding: 12px 15px;
+        font-size: 16px;
+    }
+}
+
+/* Сетка форм */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-grid .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
 /* Add this to your style.css */
 .content-card {
     padding: 16px 20px;    /* Smaller internal padding */
