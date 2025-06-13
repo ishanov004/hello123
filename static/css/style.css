@@ -9,6 +9,10 @@ body {
 
 body.login-page {
     padding-top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 /* Меню */
@@ -333,7 +337,7 @@ input, select {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 70vh;
+    width: 100%;
 }
 
 .login-form {
